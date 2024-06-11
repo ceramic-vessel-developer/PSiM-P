@@ -10,6 +10,13 @@
     border-radius: 16px;
     flex-direction: column;
     background-color: #aaaaaa;
+    transition-duration:0.1s;
+  }
+  .moje-gry-gameitem:hover{
+    background-color: #bcbcbc;
+  }
+  .moje-gry-gameitem:active{
+    background-color: #808080;
   }
   .moje-gry-text06 {
     font-size: 24px;
