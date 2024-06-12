@@ -1,0 +1,6 @@
+CREATE DATABASE psim
+    WITH
+    OWNER = postgres
+    ENCODING = 'UTF8';
+
+GRANT ALL PRIVILEGES ON DATABASE psim TO postgres;
