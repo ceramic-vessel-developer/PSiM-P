@@ -34,12 +34,18 @@ class CheckpointReturnAdmin(serializers.ModelSerializer):
 
 class GameReturn(serializers.ModelSerializer):
     admin = UserReturn(source='game_admmin')
-    checkpoints = CheckpointReturn(many=True, source='checkpoints_set')
-    achievements = AchievementReturn(many=True, source='achievements_set')
+    checkpoints = CheckpointReturn(many=True)
+    achievements = AchievementReturn(many=True)
 
     class Meta:
         model = Games
         fields = ['id', 'name', 'description', 'max_team_size', 'admin', 'checkpoints', 'achievements']
+
+
+class GameReturnStrip(serializers.ModelSerializer):
+    class Meta:
+        model = Games
+        fields = ['id', 'name', 'description', 'max_team_size']
 
 
 class GameCreate(serializers.Serializer):
@@ -56,6 +62,26 @@ class Comments(serializers.ModelSerializer):
 
 
 class TeamReturn(serializers.ModelSerializer):
+    members = serializers.ListField(child=serializers.IntegerField())
+
     class Meta:
         model = Teams
-        fields = ['id', 'game', 'name', 'points', 'game_times']
+        fields = ['id', 'game', 'name', 'points', 'game_times', 'members']
+
+
+class AchievementCreate(serializers.Serializer):
+    description = serializers.CharField()
+    bonus = serializers.IntegerField()
+    treshold = serializers.IntegerField()
+    checkpoint_id = serializers.IntegerField()
+
+
+class CheckpointCreate(serializers.Serializer):
+    name = serializers.CharField()
+    description = serializers.CharField()
+    previous = serializers.IntegerField(allow_null=True)
+    qr_code_path = serializers.CharField(allow_null=True)
+
+
+class TeamReturnID(serializers.Serializer):
+    id = serializers.IntegerField()

@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from .models import Games, Teams, TeamMembers
+from .models import Games, Teams, TeamMembers, Checkpoints, Achievements
 
 
 def get_user(username):
@@ -19,16 +19,28 @@ def create_user(user):
 
 def get_game_by_id(game_id):
     db_game = Games.objects.filter(id=game_id).first()
+    db_game.checkpoints = Checkpoints.objects.filter(game_id=game_id)
+    db_game.achievements = Achievements.objects.filter(game_id=game_id)
     return db_game
 
 
-def create_game(game):
+def create_game(game, achievements, checkpoints):
     db_game = Games(name=game["name"], description=game["description"], max_team_size=game["max_team_size"], game_admmin_id=game["game_admmin_id"])
     db_game.save()
+    for achievement in achievements:
+        db_achievement = Achievements(description=achievement["description"], bonus=achievement["bonus"], treshold=achievement["treshold"], checkpoint_id=achievement["checkpoint_id"], game_id=db_game.id)
+        db_achievement.save()
+    last_checkpoint_id = None
+    for checkpoint in checkpoints:
+        db_checkpoint = Checkpoints(name=checkpoint["name"], description=checkpoint["description"], qr_code_path=checkpoint["qr_code_path"], game_id=db_game.id, previous_id=last_checkpoint_id)
+        db_checkpoint.save()
+        last_checkpoint_id = db_checkpoint.id
 
 
 def get_game_filered_by_team_id(game_id, team_id):
     db_game = Games.objects.filter(id=game_id, teams__id=team_id).first()
+    db_game.checkpoints = Checkpoints.objects.filter(game_id=game_id)
+    db_game.achievements = Achievements.objects.filter(game_id=game_id)
     return db_game
 
 

@@ -20,4 +20,5 @@ urlpatterns = [
     path('checkpoints/<int:checkpoint_id>/admin', views.read_checkpoint_admin),
     path('teams/<int:game_id>', views.teams),
     path('teams/team/<int:team_id>', views.read_team),
+    path('teams/<int:game_id>/<int:user_id>', views.read_team_id),
 ]
