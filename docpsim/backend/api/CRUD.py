@@ -13,8 +13,8 @@ def get_user_by_id(user_id):
 
 
 def create_user(user):
-    db_user = User(username=user["username"], password=user["password"])
-    db_user.save()
+    db_user = User.objects.create_user(username=user["username"], password=user["password"])
+    return db_user
 
 
 def get_game_by_id(game_id):

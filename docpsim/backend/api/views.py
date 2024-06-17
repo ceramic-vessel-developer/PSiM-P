@@ -1,6 +1,6 @@
 from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from . import CRUD, serializers
@@ -8,6 +8,7 @@ from .models import Games, Teams, TeamMembers, Checkpoints, Unlocked, Comments
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def register(request):
     user = serializers.UserCreate(data=request.data)
     user.is_valid(raise_exception=True)
