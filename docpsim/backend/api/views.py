@@ -48,7 +48,13 @@ def read_game(request, id):
     return Response(serializers.GameReturn(db_game).data)
 
 
-@api_view(['POST'])
+@api_view(['POST', 'PUT'])
+def games(request):
+    if request.method == 'PUT':
+        return update_game(request)
+    return create_game(request)
+
+
 def create_game(request):
     game = serializers.GameCreate(data=request.data["game"])
     game.is_valid(raise_exception=True)
@@ -71,7 +77,6 @@ def read_game_team(request, game_id, team_id):
     return Response(serializers.GameReturn(db_game).data)
 
 
-@api_view(['PUT'])
 def update_game(request):
     game = serializers.GameCreate(data=request.data)
     game.is_valid(raise_exception=True)
@@ -95,12 +100,16 @@ def comments(request, checkpoint_id):
 
 @api_view(['PUT'])
 def unlock_checkpoint(request, checkpoint_id, team_id):
-    db_unlocked = Unlocked(checkpoint_id=checkpoint_id, team_id=team_id)
-    try:
-        db_unlocked.save()
-    except:
-        return Response({"detail": "Checkpoint already unlocked"}, status=400)
-    return Response({"message": "checkpoint unlocked successfully"}, status=201)
+    checkpoint = Checkpoints.objects.filter(id=checkpoint_id).values_list('previous_id', flat=True).first()
+    if checkpoint is None or Unlocked.objects.filter(checkpoint_id=checkpoint, team_id=team_id).first() is not None:
+        db_unlocked = Unlocked(checkpoint_id=checkpoint_id, team_id=team_id)
+        try:
+            db_unlocked.save()
+        except:
+            return Response({"detail": "Checkpoint already unlocked"}, status=400)
+        return Response({"message": "checkpoint unlocked successfully"}, status=201)
+    else:
+        return Response({"detail": "Previous checkpoint not unlocked"}, status=400)
 
 
 @api_view(['GET', 'POST'])
