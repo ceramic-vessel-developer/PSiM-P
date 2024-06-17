@@ -24,7 +24,7 @@ def get_game_by_id(game_id):
     return db_game
 
 
-def create_game(game, achievements, checkpoints):
+def create_game(game, checkpoints, achievements):
     db_game = Games(name=game["name"], description=game["description"], max_team_size=game["max_team_size"], game_admmin_id=game["game_admmin_id"])
     db_game.save()
     for achievement in achievements:
