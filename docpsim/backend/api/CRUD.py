@@ -25,14 +25,19 @@ def get_game_by_id(game_id):
 
 
 def create_game(game, checkpoints, achievements):
-    db_game = Games(name=game["name"], description=game["description"], max_team_size=game["max_team_size"], game_admmin_id=game["game_admmin_id"])
+    db_game = Games(name=game["name"], description=game["description"], max_team_size=game["max_team_size"],
+                    game_admmin_id=game["game_admmin_id"])
     db_game.save()
     for achievement in achievements:
-        db_achievement = Achievements(description=achievement["description"], bonus=achievement["bonus"], treshold=achievement["treshold"], checkpoint_id=achievement["checkpoint_id"], game_id=db_game.id)
+        db_achievement = Achievements(description=achievement["description"], bonus=achievement["bonus"],
+                                      treshold=achievement["treshold"], checkpoint_id=achievement["checkpoint_id"],
+                                      game_id=db_game.id)
         db_achievement.save()
     last_checkpoint_id = None
     for checkpoint in checkpoints:
-        db_checkpoint = Checkpoints(name=checkpoint["name"], description=checkpoint["description"], qr_code_path=checkpoint["qr_code_path"], game_id=db_game.id, previous_id=last_checkpoint_id)
+        db_checkpoint = Checkpoints(name=checkpoint["name"], description=checkpoint["description"],
+                                    qr_code_path=checkpoint["qr_code_path"], game_id=db_game.id,
+                                    previous_id=last_checkpoint_id)
         db_checkpoint.save()
         last_checkpoint_id = db_checkpoint.id
 
