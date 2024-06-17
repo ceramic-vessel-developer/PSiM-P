@@ -59,9 +59,9 @@ def games(request):
 def create_game(request):
     game = serializers.GameCreate(data=request.data["game"])
     game.is_valid(raise_exception=True)
-    checkpoints = serializers.CheckpointCreate(data=request.data["checkpoints"])
+    checkpoints = serializers.CheckpointCreate(data=request.data["checkpoints"], many=True)
     checkpoints.is_valid(raise_exception=True)
-    achievements = serializers.AchievementCreate(data=request.data["achievements"])
+    achievements = serializers.AchievementCreate(data=request.data["achievements"], many=True)
     achievements.is_valid(raise_exception=True)
     try:
         CRUD.create_game(game.validated_data, checkpoints.validated_data, achievements.validated_data)
