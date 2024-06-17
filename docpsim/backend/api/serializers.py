@@ -81,7 +81,3 @@ class CheckpointCreate(serializers.Serializer):
     description = serializers.CharField()
     previous = serializers.IntegerField(allow_null=True)
     qr_code_path = serializers.CharField(allow_null=True)
-
-
-class TeamReturnID(serializers.Serializer):
-    id = serializers.IntegerField()

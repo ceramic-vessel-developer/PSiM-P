@@ -150,5 +150,6 @@ def read_checkpoint_admin(request, checkpoint_id):
 
 @api_view(['GET'])
 def read_team_id(request, game_id, user_id):
-    db_team = Teams.objects.filter(game_id=game_id, teammembers__user_id=user_id)
-    return Response(serializers.TeamReturnID(db_team).data)
+    db_team = (Teams.objects.filter(game_id=game_id)
+               .filter(teammembers__user_id=user_id).first())
+    return Response(serializers.TeamReturn(db_team).data)
