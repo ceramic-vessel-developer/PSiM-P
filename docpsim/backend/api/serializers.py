@@ -33,7 +33,7 @@ class CheckpointReturnAdmin(serializers.ModelSerializer):
 
 
 class GameReturn(serializers.ModelSerializer):
-    admin = UserReturn(source='game_admmin')
+    admin = UserReturn(source='game_admin')
     checkpoints = CheckpointReturn(many=True)
     achievements = AchievementReturn(many=True)
 
@@ -52,7 +52,7 @@ class GameCreate(serializers.Serializer):
     name = serializers.CharField(max_length=64)
     description = serializers.CharField()
     max_team_size = serializers.IntegerField()
-    game_admmin_id = serializers.IntegerField()
+    game_admin_id = serializers.IntegerField()
 
 
 class Comments(serializers.ModelSerializer):

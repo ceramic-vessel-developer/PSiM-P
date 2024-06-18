@@ -6,7 +6,7 @@ class Games(models.Model):
     name = models.CharField(max_length=64, unique=True)
     description = models.TextField()
     max_team_size = models.IntegerField()
-    game_admmin = models.ForeignKey(User, on_delete=models.CASCADE)
+    game_admin = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'games'

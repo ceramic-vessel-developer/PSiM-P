@@ -132,7 +132,7 @@ def read_team(request, team_id):
 
 @api_view(['GET'])
 def read_games_admin(request, user_id):
-    db_games = Games.objects.filter(game_admmin_id=user_id)
+    db_games = Games.objects.filter(game_admin_id=user_id)
     return Response(serializers.GameReturnStrip(db_games, many=True).data)
 
 

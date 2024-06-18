@@ -26,7 +26,7 @@ def get_game_by_id(game_id):
 
 def create_game(game, checkpoints, achievements):
     db_game = Games(name=game["name"], description=game["description"], max_team_size=game["max_team_size"],
-                    game_admmin_id=game["game_admmin_id"])
+                    game_admin_id=game["game_admin_id"])
     db_game.save()
     for achievement in achievements:
         db_achievement = Achievements(description=achievement["description"], bonus=achievement["bonus"],
@@ -53,7 +53,7 @@ def update_game(game):
     db_game = Games.objects.filter(name=game["name"]).first()
     db_game.description = game["description"]
     db_game.max_team_size = game["max_team_size"]
-    db_game.game_admmin_id = game["game_admmin_id"]
+    db_game.game_admin_id = game["game_admin_id"]
     db_game.save()
     return db_game
 
