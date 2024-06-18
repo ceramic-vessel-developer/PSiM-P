@@ -28,18 +28,23 @@ def create_game(game, checkpoints, achievements):
     db_game = Games(name=game["name"], description=game["description"], max_team_size=game["max_team_size"],
                     game_admin_id=game["game_admin_id"])
     db_game.save()
-    for achievement in achievements:
-        db_achievement = Achievements(description=achievement["description"], bonus=achievement["bonus"],
-                                      treshold=achievement["treshold"], checkpoint_id=achievement["checkpoint_id"],
-                                      game_id=db_game.id)
-        db_achievement.save()
-    last_checkpoint_id = None
+    checkpoints_id = []
     for checkpoint in checkpoints:
+        previous_id = checkpoints_id[checkpoint["previous"]] if checkpoint["previous"] != -1 else None
         db_checkpoint = Checkpoints(name=checkpoint["name"], description=checkpoint["description"],
-                                    qr_code_path=checkpoint["qr_code_path"], game_id=db_game.id,
-                                    previous_id=last_checkpoint_id)
+                                    qr_code_path="mock", game_id=db_game.id, previous_id=previous_id)
         db_checkpoint.save()
-        last_checkpoint_id = db_checkpoint.id
+        checkpoints_id.append(db_checkpoint.id)
+
+    for achievement in achievements:
+        c_id = None
+        if achievement["checkpoint_id"]:
+            c_id = checkpoints_id[achievement["checkpoint_id"]]
+        db_achievement = Achievements(description=achievement["description"], unlocked=False, bonus=achievement["bonus"],
+                                      treshold=achievement["treshold"], checkpoint_id=c_id, game_id=db_game.id)
+        db_achievement.save()
+
+    return db_game.id
 
 
 def get_game_filered_by_team_id(game_id, team_id):
@@ -65,7 +70,8 @@ def create_team(team, members):
         raise Exception("Team with this name already exists")
     try:
         for member in members:
-            db_team_member = TeamMembers(user_id=member, team_id=team.id)
+            db_user = User.objects.filter(username=member).first()
+            db_team_member = TeamMembers(team_id=team.id, user_id=db_user.id)
             db_team_member.save()
     except:
         raise Exception("Error while adding team members")

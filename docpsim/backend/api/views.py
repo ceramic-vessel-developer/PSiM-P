@@ -63,11 +63,8 @@ def create_game(request):
     checkpoints.is_valid(raise_exception=True)
     achievements = serializers.AchievementCreate(data=request.data["achievements"], many=True)
     achievements.is_valid(raise_exception=True)
-    try:
-        CRUD.create_game(game.validated_data, checkpoints.validated_data, achievements.validated_data)
-    except:
-        return Response({"detail": "Game with this name already exists"}, status=400)
-    return Response({"message": "game created successfully"}, status=201)
+    id = CRUD.create_game(game.validated_data, checkpoints.validated_data, achievements.validated_data)
+    return Response({"id": id}, status=201)
 
 
 @api_view(['GET'])
@@ -81,11 +78,8 @@ def read_game_team(request, game_id, team_id):
 def update_game(request):
     game = serializers.GameCreate(data=request.data)
     game.is_valid(raise_exception=True)
-    try:
-        CRUD.update_game(game.validated_data)
-    except:
-        return Response({"detail": "Game with this name already exists"}, status=400)
-    return Response({"message": "game updated successfully"}, status=201)
+    CRUD.update_game(game.validated_data)
+    return Response(status=201)
 
 
 @api_view(['GET', 'POST'])
@@ -116,8 +110,10 @@ def unlock_checkpoint(request, checkpoint_id, team_id):
 @api_view(['GET', 'POST'])
 def teams(request, game_id):
     if request.method == 'POST':
-        db_team = Teams(game_id=game_id, name=request.data["name"], points=0, game_times=[])
-        CRUD.create_team(db_team, request.data["members"])
+        team = serializers.TeamCreate(data=request.data)
+        team.is_valid(raise_exception=True)
+        db_team = Teams(game_id=game_id, name=team.validated_data["name"], points=0, game_times=[])
+        CRUD.create_team(db_team, team.validated_data["players"])
         return Response({"message": "team created successfully"}, status=201)
     db_teams = Teams.objects.filter(game_id=game_id)
     return Response(serializers.TeamReturn(db_teams).data)
@@ -138,7 +134,11 @@ def read_games_admin(request, user_id):
 
 @api_view(['GET'])
 def read_games_player(request, user_id):
-    db_teams = TeamMembers.objects.filter(user_id=user_id)
+    db_team_members = TeamMembers.objects.filter(user_id=user_id)
+    db_teams = []
+    for member in db_team_members:
+        db_team = Teams.objects.filter(id=member.team_id).first()
+        db_teams.append(db_team)
     db_games = []
     for team in db_teams:
         db_game = Games.objects.filter(id=team.game_id).first()

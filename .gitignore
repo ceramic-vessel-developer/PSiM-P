@@ -1,2 +1,6 @@
 docpsim/frontend/node_modules
 .idea
+docpsim/backend/__pycache__/
+docpsim/backend/psim/__pycache__/
+docpsim/backend/api/__pycache__/
+docpsim/backend/api/migrations/__pycache__/

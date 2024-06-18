@@ -72,12 +72,17 @@ class TeamReturn(serializers.ModelSerializer):
 class AchievementCreate(serializers.Serializer):
     description = serializers.CharField()
     bonus = serializers.IntegerField()
-    treshold = serializers.IntegerField()
-    checkpoint_id = serializers.IntegerField()
+    treshold = serializers.IntegerField(allow_null=True, default=None)
+    checkpoint_id = serializers.IntegerField(allow_null=True, default=None)
 
 
 class CheckpointCreate(serializers.Serializer):
     name = serializers.CharField()
     description = serializers.CharField()
-    previous = serializers.IntegerField(allow_null=True)
-    qr_code_path = serializers.CharField(allow_null=True)
+    previous = serializers.IntegerField(allow_null=True, default=-1)
+    qr_code_path = serializers.CharField(allow_null=True, default=None)
+
+
+class TeamCreate(serializers.Serializer):
+    name = serializers.CharField(max_length=256)
+    players = serializers.ListField(child=serializers.CharField())
