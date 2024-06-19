@@ -10,7 +10,7 @@ urlpatterns = [
     path('users/<int:id>', views.user),
     path('games', views.games),
     path('games/<int:id>', views.read_game),
-    path('games/<int:game_id>/team/<int:team_id>', views.read_game_team),
+    path('games/<int:game_id>/teams/user/<int:user_id>', views.read_game_user),
     path('games/users/<int:user_id>/admin', views.read_games_admin),
     path('games/users/<int:user_id>/player', views.read_games_player),
     path('checkpoint/<int:checkpoint_id>/comments', views.comments),

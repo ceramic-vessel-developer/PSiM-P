@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from .models import Games, Teams, TeamMembers, Checkpoints, Achievements
+from .models import Games, Teams, TeamMembers, Checkpoints, Unlocked, Achievements
 
 
 def get_user(username):
@@ -47,10 +47,28 @@ def create_game(game, checkpoints, achievements):
     return db_game.id
 
 
-def get_game_filered_by_team_id(game_id, team_id):
-    db_game = Games.objects.filter(id=game_id, teams__id=team_id).first()
-    db_game.checkpoints = Checkpoints.objects.filter(game_id=game_id)
+def get_game_filered_by_team_id(game_id, user_id):
+    team_id = -1
+    db_teams = Teams.objects.filter(game_id=game_id)
+    for team in db_teams:
+        db_members = TeamMembers.objects.filter(user_id=user_id, team_id=team.id).first()
+        if db_members:
+            team_id = team.id
+            break
+    db_game = Games.objects.filter(id=game_id).first()
+    if db_game is None:
+        return None
     db_game.achievements = Achievements.objects.filter(game_id=game_id)
+    db_game.checkpoints_locked = list(Checkpoints.objects.filter(game_id=game_id))
+    db_game.checkpoints_unlocked = []
+
+    for checkpoint in db_game.checkpoints_locked:
+        db_unlocked = Unlocked.objects.filter(checkpoint_id=checkpoint.id, team_id=team_id).first()
+        if db_unlocked:
+            db_game.checkpoints_unlocked.append(checkpoint)
+
+    for checkpoint in db_game.checkpoints_unlocked:
+        db_game.checkpoints_locked.remove(checkpoint)
     return db_game
 
 

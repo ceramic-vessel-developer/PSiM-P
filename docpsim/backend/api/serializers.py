@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Games, Teams, Checkpoints, Comments, Achievements
+from .models import Games, Teams, Checkpoints, Achievements
 
 
 class UserCreate(serializers.Serializer):
@@ -15,9 +15,11 @@ class UserReturn(serializers.ModelSerializer):
 
 
 class AchievementReturn(serializers.ModelSerializer):
+    checkpoint_id = serializers.IntegerField(allow_null=True)
+
     class Meta:
         model = Achievements
-        fields = ['id', 'description', 'bonus', 'treshold', 'checkpoint']
+        fields = ['id', 'description', 'bonus', 'treshold', 'checkpoint_id']
 
 
 class CheckpointReturn(serializers.ModelSerializer):
@@ -33,6 +35,17 @@ class CheckpointReturnAdmin(serializers.ModelSerializer):
 
 
 class GameReturn(serializers.ModelSerializer):
+    admin = UserReturn(source='game_admin')
+    checkpoints_locked = CheckpointReturn(many=True)
+    checkpoints_unlocked = CheckpointReturn(many=True)
+    achievements = AchievementReturn(many=True)
+
+    class Meta:
+        model = Games
+        fields = ['id', 'name', 'description', 'max_team_size', 'admin', 'checkpoints_locked', 'checkpoints_unlocked', 'achievements']
+
+
+class GameReturnAll(serializers.ModelSerializer):
     admin = UserReturn(source='game_admin')
     checkpoints = CheckpointReturn(many=True)
     achievements = AchievementReturn(many=True)
@@ -55,10 +68,15 @@ class GameCreate(serializers.Serializer):
     game_admin_id = serializers.IntegerField()
 
 
-class Comments(serializers.ModelSerializer):
-    class Meta:
-        model = Comments
-        fields = '__all__'
+class CommentsCreate(serializers.Serializer):
+    comment = serializers.CharField()
+    user_id = serializers.IntegerField()
+
+
+class Comments(serializers.Serializer):
+    comment = serializers.CharField()
+    author = serializers.CharField(source='author.username')
+    time = serializers.DateTimeField(source='date_time')
 
 
 class TeamReturn(serializers.ModelSerializer):

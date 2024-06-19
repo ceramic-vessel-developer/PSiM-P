@@ -46,7 +46,7 @@ def read_game(request, id):
     db_game = CRUD.get_game_by_id(id)
     if db_game is None:
         return Response({"detail": "Game not found"}, status=404)
-    return Response(serializers.GameReturn(db_game).data)
+    return Response(serializers.GameReturnAll(db_game).data)
 
 
 @api_view(['POST', 'PUT'])
@@ -68,8 +68,8 @@ def create_game(request):
 
 
 @api_view(['GET'])
-def read_game_team(request, game_id, team_id):
-    db_game = CRUD.get_game_filered_by_team_id(game_id, team_id)
+def read_game_user(request, game_id, user_id):
+    db_game = CRUD.get_game_filered_by_team_id(game_id, user_id)
     if db_game is None:
         return Response({"detail": "Game not found"}, status=404)
     return Response(serializers.GameReturn(db_game).data)
@@ -85,7 +85,9 @@ def update_game(request):
 @api_view(['GET', 'POST'])
 def comments(request, checkpoint_id):
     if request.method == 'POST':
-        db_comment = Comments(comment=request.data["comment"], author_id=request.data["user_id"],
+        comment = serializers.CommentsCreate(data=request.data)
+        comment.is_valid(raise_exception=True)
+        db_comment = Comments(comment=comment.validated_data["comment"], author_id=comment.validated_data["user_id"],
                               checkpoint_id=checkpoint_id, date_time=timezone.now())
         db_comment.save()
         return Response({"message": "comment created successfully"}, status=201)
