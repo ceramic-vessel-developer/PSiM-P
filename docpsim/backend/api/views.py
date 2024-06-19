@@ -97,13 +97,18 @@ def comments(request, checkpoint_id):
 
 @api_view(['PUT'])
 def unlock_checkpoint(request, checkpoint_id, team_id):
-    checkpoint = Checkpoints.objects.filter(id=checkpoint_id).values_list('previous_id', flat=True).first()
-    if checkpoint is None or Unlocked.objects.filter(checkpoint_id=checkpoint, team_id=team_id).first() is not None:
+    db_duplicate = Unlocked.objects.filter(checkpoint_id=checkpoint_id, team_id=team_id).first()
+    if db_duplicate:
+        return Response({"detail": "Checkpoint already unlocked"}, status=400)
+    db_checkpoint = Checkpoints.objects.filter(id=checkpoint_id).first()
+    db_previous = Checkpoints.objects.filter(id=db_checkpoint.previous_id).first()
+
+    if not db_previous or Unlocked.objects.filter(checkpoint_id=db_previous.id, team_id=team_id).first():
         db_unlocked = Unlocked(checkpoint_id=checkpoint_id, team_id=team_id)
         try:
             db_unlocked.save()
         except:
-            return Response({"detail": "Checkpoint already unlocked"}, status=400)
+            return Response({"detail": "Database error"}, status=400)
         return Response({"message": "checkpoint unlocked successfully"}, status=201)
     else:
         return Response({"detail": "Previous checkpoint not unlocked"}, status=400)
@@ -162,6 +167,14 @@ def read_checkpoint_admin(request, checkpoint_id):
 
 @api_view(['GET'])
 def read_team_id(request, game_id, user_id):
-    db_team = (Teams.objects.filter(game_id=game_id)
-               .filter(teammembers__user_id=user_id).first())
-    return Response(serializers.TeamReturn(db_team).data)
+    team_id = -1
+    db_teams = Teams.objects.filter(game_id=game_id)
+    for team in db_teams:
+        db_members = TeamMembers.objects.filter(user_id=user_id, team_id=team.id).first()
+        if db_members:
+            team_id = team.id
+            break
+    if team_id == -1:
+        return Response({"detail": "Nie znaleziono zespołu"}, status=404)
+    db_team = Teams.objects.filter(id=team_id).first()
+    return Response(serializers.TeamReturnShort(db_team).data)

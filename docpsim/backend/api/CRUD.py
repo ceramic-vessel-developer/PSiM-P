@@ -1,3 +1,5 @@
+import segno
+from django.conf import settings
 from django.contrib.auth.models import User
 from .models import Games, Teams, TeamMembers, Checkpoints, Unlocked, Achievements
 
@@ -34,7 +36,14 @@ def create_game(game, checkpoints, achievements):
         db_checkpoint = Checkpoints(name=checkpoint["name"], description=checkpoint["description"],
                                     qr_code_path="mock", game_id=db_game.id, previous_id=previous_id)
         db_checkpoint.save()
-        checkpoints_id.append(db_checkpoint.id)
+        new_id = db_checkpoint.id
+        qr_string = f"{settings.PROXY}/unlock/{db_game.id}/{new_id}"
+        qr_code = segno.make_qr(qr_string)
+        qr_path = settings.QR_PATH / f"qr_{new_id}.png"
+        qr_code.save(str(qr_path), scale=10)
+        db_checkpoint.qr_code_path = f"qr_{new_id}.png"
+        db_checkpoint.save()
+        checkpoints_id.append(new_id)
 
     for achievement in achievements:
         c_id = None

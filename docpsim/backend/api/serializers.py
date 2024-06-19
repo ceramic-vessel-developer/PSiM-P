@@ -79,6 +79,14 @@ class Comments(serializers.Serializer):
     time = serializers.DateTimeField(source='date_time')
 
 
+class TeamReturnShort(serializers.ModelSerializer):
+    game_id = serializers.IntegerField()
+
+    class Meta:
+        model = Teams
+        fields = ['id', 'game_id', 'name', 'points', 'game_times']
+
+
 class TeamReturn(serializers.ModelSerializer):
     members = serializers.ListField(child=serializers.IntegerField())
 

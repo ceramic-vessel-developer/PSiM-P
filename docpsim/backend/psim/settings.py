@@ -116,3 +116,6 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1440),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+PROXY = 'http://localhost:3000'
+QR_PATH = BASE_DIR.parent / 'frontend' / 'public' / 'assets' / 'images'
