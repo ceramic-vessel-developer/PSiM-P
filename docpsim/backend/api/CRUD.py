@@ -21,6 +21,8 @@ def create_user(user):
 
 def get_game_by_id(game_id):
     db_game = Games.objects.filter(id=game_id).first()
+    if db_game is None:
+        return None
     db_game.checkpoints = Checkpoints.objects.filter(game_id=game_id)
     db_game.achievements = Achievements.objects.filter(game_id=game_id)
     return db_game
@@ -47,7 +49,7 @@ def create_game(game, checkpoints, achievements):
 
     for achievement in achievements:
         c_id = None
-        if achievement["checkpoint_id"]:
+        if achievement["checkpoint_id"] or achievement["checkpoint_id"] == 0:
             c_id = checkpoints_id[achievement["checkpoint_id"]]
         db_achievement = Achievements(description=achievement["description"], unlocked=False, bonus=achievement["bonus"],
                                       treshold=achievement["treshold"], checkpoint_id=c_id, game_id=db_game.id)

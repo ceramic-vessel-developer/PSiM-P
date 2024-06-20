@@ -88,11 +88,12 @@ class TeamReturnShort(serializers.ModelSerializer):
 
 
 class TeamReturn(serializers.ModelSerializer):
-    members = serializers.ListField(child=serializers.IntegerField())
+    game_id = serializers.IntegerField()
+    members = serializers.ListField(child=serializers.CharField())
 
     class Meta:
         model = Teams
-        fields = ['id', 'game', 'name', 'points', 'game_times', 'members']
+        fields = ['id', 'game_id', 'name', 'points', 'game_times', 'members']
 
 
 class AchievementCreate(serializers.Serializer):

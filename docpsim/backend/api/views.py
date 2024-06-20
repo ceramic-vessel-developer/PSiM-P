@@ -1,10 +1,11 @@
+from django.contrib.auth.models import User
 from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from . import CRUD, serializers
-from .models import Games, Teams, TeamMembers, Checkpoints, Unlocked, Comments
+from .models import Games, Teams, TeamMembers, Checkpoints, Unlocked, Comments, Achievements
 
 
 @api_view(['POST'])
@@ -109,6 +110,27 @@ def unlock_checkpoint(request, checkpoint_id, team_id):
             db_unlocked.save()
         except:
             return Response({"detail": "Database error"}, status=400)
+        points = 1
+        db_locked = []
+        db_team = Teams.objects.filter(id=team_id).first()
+        db_achievements = Achievements.objects.filter(game_id=db_team.game_id, unlocked=False)
+        for achievement in db_achievements:
+            if achievement.treshold:
+                if points + db_team.points >= achievement.treshold:
+                    points += achievement.bonus
+                    db_locked.append(achievement.id)
+            else:
+                if checkpoint_id == achievement.checkpoint_id:
+                    points += achievement.bonus
+                    db_locked.append(achievement.id)
+        for achievement in db_achievements:
+            if achievement.treshold and achievement.id not in db_locked:
+                if points + db_team.points >= achievement.treshold:
+                    points += achievement.bonus
+                    db_locked.append(achievement.id)
+        points += db_team.points
+        Teams.objects.filter(id=team_id).update(points=points)
+        Achievements.objects.filter(id__in=db_locked).update(unlocked=True)
         return Response({"message": "checkpoint unlocked successfully"}, status=201)
     else:
         return Response({"detail": "Previous checkpoint not unlocked"}, status=400)
@@ -123,13 +145,20 @@ def teams(request, game_id):
         CRUD.create_team(db_team, team.validated_data["players"])
         return Response({"message": "team created successfully"}, status=201)
     db_teams = Teams.objects.filter(game_id=game_id)
-    return Response(serializers.TeamReturn(db_teams).data)
+    return Response(serializers.TeamReturnShort(db_teams, many=True).data)
 
 
 @api_view(['GET'])
 def read_team(request, team_id):
     db_team = Teams.objects.filter(id=team_id).first()
-    db_team.members = TeamMembers.objects.filter(team_id=team_id).values_list('user_id', flat=True)
+    if db_team is None:
+        return Response({"detail": "Nie znaleziono zespołu"}, status=404)
+    db_team_members = TeamMembers.objects.filter(team_id=team_id)
+    members_list = []
+    for team_member in db_team_members:
+        db_user = User.objects.filter(id=team_member.user_id).first()
+        members_list.append(db_user.username)
+    db_team.members = members_list
     return Response(serializers.TeamReturn(db_team).data)
 
 
